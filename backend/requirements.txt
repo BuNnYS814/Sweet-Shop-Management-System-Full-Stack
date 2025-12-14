@@ -2,7 +2,7 @@ fastapi
 uvicorn[standard]
 sqlalchemy
 passlib[bcrypt]==1.7.4
-bcrypt==4.0.1
+bcrypt==3.2.0
 python-jose[cryptography]
 pydantic
 psycopg2-binary
