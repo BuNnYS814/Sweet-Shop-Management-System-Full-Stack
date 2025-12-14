@@ -39,5 +39,14 @@ def root():
 def health_check():
     return {"status": "healthy", "service": "sweet-shop-backend"}
 
+@app.post("/init-db")
+def initialize_database():
+    """Manually initialize database (useful for troubleshooting)"""
+    try:
+        init_db()
+        return {"status": "success", "message": "Database initialized"}
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
+
 app.include_router(auth_router)
 app.include_router(sweets_router)

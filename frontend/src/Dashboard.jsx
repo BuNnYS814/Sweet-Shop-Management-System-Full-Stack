@@ -134,9 +134,28 @@ function Dashboard({ user, onLogout }) {
         ))}
       </div>
 
-      {sweets.length === 0 && (
+      {sweets.length === 0 && !loading && (
         <div style={{ textAlign: 'center', padding: '40px', color: '#666' }}>
-          No sweets available. {user.is_admin && 'Add some sweets in the admin panel!'}
+          <p>No sweets available.</p>
+          {user.is_admin ? (
+            <p>Add some sweets in the admin panel!</p>
+          ) : (
+            <p>Please contact an administrator.</p>
+          )}
+          <button
+            onClick={loadSweets}
+            style={{
+              marginTop: '20px',
+              padding: '10px 20px',
+              background: '#667eea',
+              color: 'white',
+              border: 'none',
+              borderRadius: '5px',
+              cursor: 'pointer'
+            }}
+          >
+            Refresh
+          </button>
         </div>
       )}
     </div>
