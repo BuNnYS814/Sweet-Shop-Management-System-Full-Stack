@@ -14,15 +14,22 @@ def get_db():
 
 @router.post("/register")
 def register(user: dict, db: Session = Depends(get_db)):
+    # Check if user already exists
+    existing = db.query(User).filter(User.email == user["email"]).first()
+    if existing:
+        raise HTTPException(400, "Email already registered")
+    
     u = User(email=user["email"], hashed_password=hash_password(user["password"]))
-    db.add(u); db.commit()
-    return {"msg": "ok"}
+    db.add(u)
+    db.commit()
+    db.refresh(u)
+    return {"msg": "Registration successful", "email": u.email}
 
 @router.post("/login")
 def login(user: dict, db: Session = Depends(get_db)):
     u = db.query(User).filter(User.email == user["email"]).first()
     if not u or not verify_password(user["password"], u.hashed_password):
-        raise HTTPException(401, "Invalid")
+        raise HTTPException(401, "Invalid email or password")
     return {
         "access_token": create_access_token({"sub": u.email}),
         "email": u.email,
