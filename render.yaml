@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: sweet-shop-backend
+    env: python
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DATABASE_URL
+        fromDatabase:
+          name: sweet-shop-db
+          property: connectionString
+    database:
+      name: sweet-shop-db
+      databaseName: sweetshop
+      user: sweetshop
