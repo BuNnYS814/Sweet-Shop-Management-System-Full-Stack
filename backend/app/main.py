@@ -1,16 +1,21 @@
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from contextlib import asynccontextmanager
 from app.database import Base, engine
 from app.auth.routes import router as auth_router
 from app.sweets.routes import router as sweets_router
 from app.init_db import init_db
 
-Base.metadata.create_all(bind=engine)
-# Initialize database with admin user and sample sweets
-init_db()
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup: Create tables and initialize data
+    Base.metadata.create_all(bind=engine)
+    init_db()
+    yield
+    # Shutdown (if needed)
 
-app = FastAPI(title="Sweet Shop API", version="1.0.0")
+app = FastAPI(title="Sweet Shop API", version="1.0.0", lifespan=lifespan)
 
 # CORS middleware for frontend communication
 app.add_middleware(

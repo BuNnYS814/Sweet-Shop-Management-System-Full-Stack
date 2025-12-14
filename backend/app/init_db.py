@@ -14,9 +14,14 @@ def init_db():
                 is_admin=True
             )
             db.add(admin)
+            db.commit()
+            print("Admin user created!")
+        else:
+            print("Admin user already exists")
         
         # Add sample sweets if none exist
-        if db.query(Sweet).count() == 0:
+        sweet_count = db.query(Sweet).count()
+        if sweet_count == 0:
             sweets = [
                 Sweet(name="Chocolate Bar", category="Chocolate", price=2.50, quantity=50),
                 Sweet(name="Gummy Bears", category="Gummies", price=3.00, quantity=30),
@@ -26,11 +31,15 @@ def init_db():
             ]
             for sweet in sweets:
                 db.add(sweet)
+            db.commit()
+            print(f"Added {len(sweets)} sample sweets!")
+        else:
+            print(f"Database already has {sweet_count} sweets")
         
-        db.commit()
-        print("Database initialized successfully!")
     except Exception as e:
         print(f"Error initializing database: {e}")
+        import traceback
+        traceback.print_exc()
         db.rollback()
     finally:
         db.close()

@@ -13,10 +13,13 @@ function Dashboard({ user, onLogout }) {
   const loadSweets = async () => {
     try {
       setLoading(true);
+      setMessage('');
       const data = await sweetsAPI.getAll();
-      setSweets(data);
+      setSweets(data || []);
     } catch (error) {
-      setMessage('Failed to load sweets');
+      console.error('Error loading sweets:', error);
+      const errorMsg = error.response?.data?.detail || error.message || 'Failed to load sweets';
+      setMessage(`Error: ${errorMsg}`);
     } finally {
       setLoading(false);
     }

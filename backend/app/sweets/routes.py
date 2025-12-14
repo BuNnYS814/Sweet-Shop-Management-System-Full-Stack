@@ -26,8 +26,11 @@ def get_current_user(authorization: Optional[str] = Header(None), db: Session = 
 
 @router.get("")
 def get_sweets(db: Session = Depends(get_db)):
-    sweets = db.query(Sweet).all()
-    return [{"id": s.id, "name": s.name, "category": s.category, "price": s.price, "quantity": s.quantity} for s in sweets]
+    try:
+        sweets = db.query(Sweet).all()
+        return [{"id": s.id, "name": s.name, "category": s.category, "price": float(s.price), "quantity": s.quantity} for s in sweets]
+    except Exception as e:
+        return []
 
 @router.post("")
 def create_sweet(sweet: dict, db: Session = Depends(get_db), user: User = Depends(get_current_user)):
