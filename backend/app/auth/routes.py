@@ -23,4 +23,8 @@ def login(user: dict, db: Session = Depends(get_db)):
     u = db.query(User).filter(User.email == user["email"]).first()
     if not u or not verify_password(user["password"], u.hashed_password):
         raise HTTPException(401, "Invalid")
-    return {"access_token": create_access_token({"sub": u.email})}
+    return {
+        "access_token": create_access_token({"sub": u.email}),
+        "email": u.email,
+        "is_admin": u.is_admin
+    }

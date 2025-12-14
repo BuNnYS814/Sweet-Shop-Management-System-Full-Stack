@@ -32,3 +32,12 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
 def create_access_token(data):
     data["exp"] = datetime.utcnow() + timedelta(hours=1)
     return jwt.encode(data, SECRET_KEY, algorithm=ALGORITHM)
+
+def decode_access_token(token: str):
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        return payload
+    except jwt.ExpiredSignatureError:
+        return None
+    except jwt.JWTError:
+        return None
