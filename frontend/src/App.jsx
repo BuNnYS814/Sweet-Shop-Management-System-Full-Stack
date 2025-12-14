@@ -3,11 +3,30 @@ import { authAPI } from './api';
 import Dashboard from './Dashboard';
 import AdminPanel from './AdminPanel';
 
+// Professional color palette
+const colors = {
+  primary: '#6366f1',      // Indigo
+  primaryDark: '#4f46e5',
+  primaryLight: '#818cf8',
+  secondary: '#ec4899',    // Pink
+  success: '#10b981',      // Green
+  danger: '#ef4444',       // Red
+  warning: '#f59e0b',       // Amber
+  info: '#3b82f6',         // Blue
+  dark: '#1f2937',         // Gray
+  light: '#f9fafb',
+  white: '#ffffff',
+  border: '#e5e7eb',
+  text: '#374151',
+  textLight: '#6b7280',
+};
+
 function App() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLogin, setIsLogin] = useState(true);
   const [message, setMessage] = useState('');
+  const [loading, setLoading] = useState(false);
   const [token, setToken] = useState(localStorage.getItem('token') || '');
   const [user, setUser] = useState(() => {
     const stored = localStorage.getItem('user');
@@ -17,12 +36,10 @@ function App() {
   // Check if user is logged in on mount
   useEffect(() => {
     if (token && !user) {
-      // Token exists but user info missing, try to get from storage or logout
       const stored = localStorage.getItem('user');
       if (stored) {
         setUser(JSON.parse(stored));
       } else {
-        // Invalid state, clear token
         setToken('');
         localStorage.removeItem('token');
       }
@@ -32,6 +49,7 @@ function App() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setMessage('');
+    setLoading(true);
     
     try {
       if (isLogin) {
@@ -41,9 +59,10 @@ function App() {
         setUser(userData);
         localStorage.setItem('token', data.access_token);
         localStorage.setItem('user', JSON.stringify(userData));
-        setMessage('Login successful!');
+        setMessage('Login successful! Redirecting...');
         setEmail('');
         setPassword('');
+        setTimeout(() => setMessage(''), 1000);
       } else {
         await authAPI.register(email, password);
         setMessage('Registration successful! Please login.');
@@ -52,7 +71,9 @@ function App() {
         setPassword('');
       }
     } catch (error) {
-      setMessage(error.response?.data?.detail || 'An error occurred');
+      setMessage(error.response?.data?.detail || 'An error occurred. Please try again.');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -71,20 +92,20 @@ function App() {
       return (
         <div style={{ 
           minHeight: '100vh', 
-          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+          background: `linear-gradient(135deg, ${colors.primary} 0%, ${colors.secondary} 100%)`,
           padding: '20px'
         }}>
-          <AdminPanel user={user} onLogout={handleLogout} />
+          <AdminPanel user={user} onLogout={handleLogout} colors={colors} />
         </div>
       );
     } else {
       return (
         <div style={{ 
           minHeight: '100vh', 
-          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+          background: `linear-gradient(135deg, ${colors.primary} 0%, ${colors.secondary} 100%)`,
           padding: '20px'
         }}>
-          <Dashboard user={user} onLogout={handleLogout} />
+          <Dashboard user={user} onLogout={handleLogout} colors={colors} />
         </div>
       );
     }
@@ -98,44 +119,68 @@ function App() {
       flexDirection: 'column',
       alignItems: 'center',
       justifyContent: 'center',
-      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+      background: `linear-gradient(135deg, ${colors.primary} 0%, ${colors.secondary} 100%)`,
       padding: '20px',
-      fontFamily: 'Arial, sans-serif'
+      fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif'
     }}>
       <div style={{
-        background: 'white',
+        background: colors.white,
         padding: '40px',
-        borderRadius: '10px',
-        boxShadow: '0 10px 40px rgba(0,0,0,0.2)',
+        borderRadius: '16px',
+        boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
         width: '100%',
-        maxWidth: '400px'
+        maxWidth: '420px',
+        animation: 'fadeIn 0.5s ease-in'
       }}>
+        <style>{`
+          @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+          }
+          button:hover { transform: translateY(-2px); transition: all 0.2s; }
+          button:active { transform: translateY(0); }
+        `}</style>
+        
         <div style={{ textAlign: 'center', marginBottom: '30px' }}>
-          <div style={{ fontSize: '48px', marginBottom: '10px' }}>🍬</div>
+          <div style={{ fontSize: '56px', marginBottom: '10px', filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))' }}>🍬</div>
           <h1 style={{ 
-            color: '#667eea',
+            color: colors.primary,
             margin: 0,
-            fontSize: '2rem'
+            fontSize: '2.5rem',
+            fontWeight: '700',
+            letterSpacing: '-0.5px'
           }}>
             Sweet Shop
           </h1>
+          <p style={{ color: colors.textLight, marginTop: '8px', fontSize: '14px' }}>
+            Your favorite sweets, just a click away
+          </p>
         </div>
 
-        <div style={{ marginBottom: '20px', textAlign: 'center' }}>
+        <div style={{ 
+          marginBottom: '24px', 
+          display: 'flex', 
+          gap: '8px',
+          background: colors.light,
+          padding: '4px',
+          borderRadius: '8px'
+        }}>
           <button
             onClick={() => {
               setIsLogin(true);
               setMessage('');
             }}
             style={{
-              padding: '10px 20px',
-              marginRight: '10px',
-              background: isLogin ? '#667eea' : '#e0e0e0',
-              color: isLogin ? 'white' : '#333',
+              flex: 1,
+              padding: '12px',
+              background: isLogin ? colors.primary : 'transparent',
+              color: isLogin ? colors.white : colors.text,
               border: 'none',
-              borderRadius: '5px',
+              borderRadius: '6px',
               cursor: 'pointer',
-              fontWeight: isLogin ? 'bold' : 'normal'
+              fontWeight: isLogin ? '600' : '400',
+              transition: 'all 0.2s',
+              fontSize: '15px'
             }}
           >
             Login
@@ -146,13 +191,16 @@ function App() {
               setMessage('');
             }}
             style={{
-              padding: '10px 20px',
-              background: !isLogin ? '#667eea' : '#e0e0e0',
-              color: !isLogin ? 'white' : '#333',
+              flex: 1,
+              padding: '12px',
+              background: !isLogin ? colors.primary : 'transparent',
+              color: !isLogin ? colors.white : colors.text,
               border: 'none',
-              borderRadius: '5px',
+              borderRadius: '6px',
               cursor: 'pointer',
-              fontWeight: !isLogin ? 'bold' : 'normal'
+              fontWeight: !isLogin ? '600' : '400',
+              transition: 'all 0.2s',
+              fontSize: '15px'
             }}
           >
             Register
@@ -160,21 +208,26 @@ function App() {
         </div>
 
         <form onSubmit={handleSubmit}>
-          <div style={{ marginBottom: '15px' }}>
+          <div style={{ marginBottom: '16px' }}>
             <input
               type="email"
-              placeholder="Email"
+              placeholder="Email address"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
+              disabled={loading}
               style={{
                 width: '100%',
-                padding: '12px',
-                border: '1px solid #ddd',
-                borderRadius: '5px',
-                fontSize: '16px',
-                boxSizing: 'border-box'
+                padding: '14px',
+                border: `2px solid ${colors.border}`,
+                borderRadius: '8px',
+                fontSize: '15px',
+                boxSizing: 'border-box',
+                transition: 'border-color 0.2s',
+                outline: 'none'
               }}
+              onFocus={(e) => e.target.style.borderColor = colors.primary}
+              onBlur={(e) => e.target.style.borderColor = colors.border}
             />
           </div>
           <div style={{ marginBottom: '20px' }}>
@@ -184,51 +237,72 @@ function App() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
+              disabled={loading}
               style={{
                 width: '100%',
-                padding: '12px',
-                border: '1px solid #ddd',
-                borderRadius: '5px',
-                fontSize: '16px',
-                boxSizing: 'border-box'
+                padding: '14px',
+                border: `2px solid ${colors.border}`,
+                borderRadius: '8px',
+                fontSize: '15px',
+                boxSizing: 'border-box',
+                transition: 'border-color 0.2s',
+                outline: 'none'
               }}
+              onFocus={(e) => e.target.style.borderColor = colors.primary}
+              onBlur={(e) => e.target.style.borderColor = colors.border}
             />
           </div>
           {isLogin && (
-            <div style={{ marginBottom: '15px', fontSize: '12px', color: '#666', textAlign: 'center' }}>
-              Admin: admin@sweetshop.com / admin123
+            <div style={{ 
+              marginBottom: '16px', 
+              fontSize: '12px', 
+              color: colors.textLight, 
+              textAlign: 'center',
+              padding: '10px',
+              background: colors.light,
+              borderRadius: '6px'
+            }}>
+              <strong>Demo Admin:</strong> admin@sweetshop.com / admin123
             </div>
           )}
           <button
             type="submit"
+            disabled={loading}
             style={{
               width: '100%',
-              padding: '12px',
-              background: '#667eea',
-              color: 'white',
+              padding: '14px',
+              background: loading ? colors.textLight : colors.primary,
+              color: colors.white,
               border: 'none',
-              borderRadius: '5px',
-              cursor: 'pointer',
+              borderRadius: '8px',
+              cursor: loading ? 'not-allowed' : 'pointer',
               fontSize: '16px',
-              fontWeight: 'bold'
+              fontWeight: '600',
+              transition: 'all 0.2s',
+              boxShadow: loading ? 'none' : `0 4px 12px ${colors.primary}40`
             }}
           >
-            {isLogin ? 'Login' : 'Register'}
+            {loading ? 'Processing...' : (isLogin ? 'Sign In' : 'Create Account')}
           </button>
         </form>
 
         {message && (
-          <p style={{
+          <div style={{
             marginTop: '20px',
-            padding: '10px',
-            background: message.includes('successful') || message.includes('logged in') ? '#d4edda' : '#f8d7da',
-            color: message.includes('successful') || message.includes('logged in') ? '#155724' : '#721c24',
-            borderRadius: '5px',
+            padding: '12px',
+            background: message.includes('successful') || message.includes('Redirecting') ? 
+              `${colors.success}15` : `${colors.danger}15`,
+            color: message.includes('successful') || message.includes('Redirecting') ? 
+              colors.success : colors.danger,
+            borderRadius: '8px',
             textAlign: 'center',
-            fontSize: '14px'
+            fontSize: '14px',
+            fontWeight: '500',
+            border: `1px solid ${message.includes('successful') || message.includes('Redirecting') ? 
+              colors.success : colors.danger}40`
           }}>
             {message}
-          </p>
+          </div>
         )}
       </div>
     </div>
