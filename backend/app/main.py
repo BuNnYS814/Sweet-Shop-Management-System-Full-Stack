@@ -5,7 +5,7 @@ from app.database import Base, engine
 from app.auth.routes import router as auth_router
 
 Base.metadata.create_all(bind=engine)
-app = FastAPI()
+app = FastAPI(title="Sweet Shop API", version="1.0.0")
 
 # CORS middleware for frontend communication
 app.add_middleware(
@@ -15,5 +15,18 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+@app.get("/")
+def root():
+    return {
+        "message": "Sweet Shop API",
+        "version": "1.0.0",
+        "docs": "/docs",
+        "health": "/health"
+    }
+
+@app.get("/health")
+def health_check():
+    return {"status": "healthy", "service": "sweet-shop-backend"}
 
 app.include_router(auth_router)
